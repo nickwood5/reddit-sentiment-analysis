@@ -5,7 +5,7 @@ async def input_handler(websocket, client):
 
     async for message in websocket:
         message = json.loads(message)
-        #print("Received message {} from {}".format(message, client))
+        print("Received message {} from {}".format(message, client))
 
 local_host = True
 
