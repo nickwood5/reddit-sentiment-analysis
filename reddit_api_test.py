@@ -4,7 +4,8 @@ from os import times
 from statistics import mean
 from time import time
 from urllib import response
-import requests, test, config
+from numpy import average
+import requests, test, config, heapq
 
 app_id = config.app_id
 secret = config.secret
@@ -63,7 +64,10 @@ def construct_api_url(subreddit, after, before):
     url = "https://api.pushshift.io/reddit/submission/search/?after={}&before={}&sort_type=created_utc&size=500&sort=asc&subreddit={}".format(after, before, subreddit)
     return url
 
-def get_post_list(subreddit, after, before):
+async def send_websocket_data(websocket, type, data):
+    await websocket.send(json.dumps({"type": type, "data": data}))
+
+async def get_post_list(subreddit, after, before, websocket):
     
     #api = 'https://oauth.reddit.com'
     #res = requests.get('{}/comments/b8yd3r/.json'.format(api), headers=headers)
@@ -108,7 +112,14 @@ def get_post_list(subreddit, after, before):
             timestamps.append((after, before))
 
         #print(timestamps)
-        for segment in timestamps:
+        estimated_times = []
+        elapsed_time = 0
+        all_epoch_times = []
+        num_epochs = len(timestamps)
+        for segment_index, segment in enumerate(timestamps):
+            epoch_start_timestamp = time()
+
+            epoch = segment_index + 1
             url = construct_api_url(subreddit, segment[0], segment[1])
             #print(url)
             response_code = 400
@@ -122,6 +133,36 @@ def get_post_list(subreddit, after, before):
             #print(a.status_code)
             handle_post_list(a, ids, database)
 
+            epoch_end_timestamp = time()
+            total_epoch_time = epoch_end_timestamp - epoch_start_timestamp
+            elapsed_time += total_epoch_time
+            print("This took {}".format(total_epoch_time))
+            all_epoch_times.append(total_epoch_time)
+            estimated = max(all_epoch_times) * num_epochs
+            print("Estimated time is {}".format(estimated))
+
+            percentage = round((epoch / num_epochs) * 100, 2)
+            print(percentage)
+
+            half = int(round(len(all_epoch_times) / 2, 0))
+            print(round(len(all_epoch_times) / 2, 0))
+            print(heapq.nlargest(half, all_epoch_times))
+            if half > 0:
+                top_half = heapq.nlargest(half, all_epoch_times)
+            else:
+                top_half = all_epoch_times
+            print(mean(top_half) * num_epochs)
+
+            remaining_epochs = num_epochs - epoch
+            print("{} remaining".format(remaining_epochs))
+            print(remaining_epochs * mean(all_epoch_times))
+            estimated_time_remaining = remaining_epochs * mean(all_epoch_times)
+            estimated_times.append(estimated_time_remaining + elapsed_time)
+
+            data = {"estimated_time_remaining": estimated_time_remaining, "percentage": percentage}
+            await send_websocket_data(websocket, "progress", data)
+
+    print(estimated_times)
 
 
     #print(ids)
@@ -163,10 +204,15 @@ def get_post_list(subreddit, after, before):
     print(sum(weighted_averages))
     print("{} to {} took {}, analyzed {} posts".format(after, before, end_time - start_time, len(weighted_averages)))
 
+    sentiment = sum(weighted_averages)
+    await send_websocket_data(websocket, "sentiment_result", sentiment)
+
+    await websocket.close()
+
     return weighted_average
 
 
-get_post_list("bitcoin", 1662521042, 1662607442)
+#get_post_list("bitcoin", 1662521042, 1662607442)
 
 """
 start = 1662521042

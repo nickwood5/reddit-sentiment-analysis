@@ -1,4 +1,5 @@
-import json, websockets, os, asyncio, threading, reddit_api_test
+from asyncio.base_subprocess import WriteSubprocessPipeProto
+import json, websockets, os, asyncio, threading, reddit_api_test, heapq
 
 async def input_handler(websocket, client):
     global connected_users, player_speeds
@@ -6,7 +7,9 @@ async def input_handler(websocket, client):
     async for message in websocket:
         message = json.loads(message)
         print("Received message {} from {}".format(message, client))
-        reddit_api_test.get_post_list(message["subreddit"], message["after"], message["before"])
+        await websocket.send(json.dumps({"message": "hi"}))
+        
+        await reddit_api_test.get_post_list(message["subreddit"], message["after"], message["before"], websocket)
 
 local_host = True
 
@@ -15,7 +18,7 @@ async def main():
 
     if local_host:
         selected_host = "localhost"
-        selected_port = "8000"
+        selected_port = "8001"
     else:
         selected_host = ""
         selected_port = os.environ["PORT"]
@@ -23,7 +26,8 @@ async def main():
     async with websockets.serve(
         input_handler,
         host=selected_host,
-        port=selected_port
+        port=selected_port,
+        ping_interval=None
     ):
         await asyncio.Future()
 
