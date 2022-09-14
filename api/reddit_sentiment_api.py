@@ -1,9 +1,8 @@
-import imp
 from flask import Blueprint, jsonify
 import flask
 from uuid import uuid4
 
-reddit_sentiment_api = Blueprint('lego_minecraft_api', __name__)
+reddit_sentiment_api = Blueprint('reddit_sentiment_api', __name__)
 
 def create_simple_message(type, data):
     return flask.make_response(jsonify({"type": type, "data": data}))
