@@ -2,8 +2,15 @@ import asyncio
 import websockets, json
 from flask import jsonify
 
+
+local_host = True
+if local_host:
+    app_url = "ws://localhost:8003/BIG"
+else:
+    app_url = "wss://nickwood-reddit-sentiment.herokuapp.com/444"
+
 async def hello():
-    async with websockets.connect("ws://localhost:8001/d81229d9-981e-4c3d-9fe2-bac3b1afbf1a", ping_interval=None) as websocket:
+    async with websockets.connect(app_url) as websocket:
         await websocket.send(json.dumps({"subreddit": "bitcoin", "after": 1662521042, "before": 1662607442}))
         while True:
             try:

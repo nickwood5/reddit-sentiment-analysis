@@ -1,0 +1,243 @@
+<style>
+    * { box-sizing: border-box; }
+body {
+  font: 16px Arial; 
+}
+.autocomplete {
+  /*the container must be positioned relative:*/
+  position: relative;
+  display: inline-block;
+}
+input {
+  border: 1px solid transparent;
+  background-color: #f1f1f1;
+  padding: 10px;
+  font-size: 16px;
+}
+input[type=text] {
+  background-color: #f1f1f1;
+  width: 100%;
+}
+input[type=submit] {
+  background-color: DodgerBlue;
+  color: #fff;
+}
+.autocomplete-items {
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  border-bottom: none;
+  border-top: none;
+  z-index: 99;
+  /*position the autocomplete items to be the same width as the container:*/
+  top: 100%;
+  left: 0;
+  right: 0;
+}
+.autocomplete-items div {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #fff; 
+  border-bottom: 1px solid #d4d4d4; 
+}
+.autocomplete-items div:hover {
+  /*when hovering an item:*/
+  background-color: #e9e9e9; 
+}
+.autocomplete-active {
+  /*when navigating through the items using the arrow keys:*/
+  background-color: DodgerBlue !important; 
+  color: #ffffff; 
+}
+</style>
+
+<script defer type=module>
+    var countries = ["announcements",	"funny",	"AskReddit",	"gaming",	"aww",	"Music",	"worldnews",	"pics",	"movies",	"todayilearned",	"science",	"videos",	"Showerthoughts",	"news",	"Jokes",	"askscience",	"food",	"EarthPorn",	"IAmA",	"nottheonion",	"gifs",	"DIY",	"books",	"space",	"Art",	"explainlikeimfive",	"LifeProTips",	"memes",	"mildlyinteresting",	"sports",	"gadgets",	"Documentaries",	"blog",	"dataisbeautiful",	"UpliftingNews",	"GetMotivated",	"tifu",	"photoshopbattles",	"listentothis",	"history",	"philosophy",	"Futurology",	"OldSchoolCool",	"nosleep",	"television",	"personalfinance",	"InternetIsBeautiful",	"WritingPrompts",	"creepy",	"TwoXChromosomes",	"technology",	"wallstreetbets",	"wholesomememes",	"interestingasfuck",	"Fitness",	"AdviceAnimals",	"lifehacks",	"politics",	"NatureIsFuckingLit",	"Unexpected",	"oddlysatisfying",	"relationship_advice",	"WTF",	"travel",	"Minecraft",	"nextfuckinglevel",	"dadjokes",	"Whatcouldgowrong",	"pcmasterrace",	"facepalm",	"MadeMeSmile",	"me_irl",	"buildapc",	"Damnthatsinteresting",	"leagueoflegends",	"AnimalsBeingDerps",	"AnimalsBeingBros",	"dankmemes",	"BlackPeopleTwitter",	"Tinder",	"PS4",	"place",	"bestof",	"CryptoCurrency",	"tattoos",	"AnimalsBeingJerks",	"nba",	"HistoryMemes",	"anime",	"gardening",	"photography",	"mildlyinfuriating",	"Awwducational",	"WatchPeopleDieInside",	"Parenting",	"malefashionadvice",	"EatCheapAndHealthy",	"FoodPorn",	"programming",	"AmItheAsshole",	"Bitcoin",	"stocks",	"woodworking",	"BeAmazed",	"trippinthroughtime",	"BikiniBottomTwitter",	"ContagiousLaughter",	"instant_regret",	"PublicFreakout",	"rarepuppers",	"NintendoSwitch",	"AskMen",	"pokemon",	"dating_advice",	"HumansBeingBros",	"YouShouldKnow",	"Outdoors",	"pokemongo",	"AskWomen",	"woahdude",	"itookapicture",	"HighQualityGifs",	"IdiotsInCars",	"Overwatch",	"reactiongifs",	"xboxone",	"streetwear",	"cats",	"iphone",	"apple",	"loseit",	"nonononoyes",	"starterpacks",	"Eyebleach",	"boardgames",	"cars",	"PewdiepieSubmissions",	"drawing",	"therewasanattempt",	"MovieDetails",	"NetflixBestOf",	"europe",	"soccer",	"Cooking",	"battlestations",	"learnprogramming",	"KidsAreFuckingStupid",	"confession",	"MakeupAddiction",	"blackmagicfuckery",	"scifi",	"entertainment",	"GifRecipes",	"recipes",	"backpacking",	"HomeImprovement",	"cursedcomments",	"HistoryPorn",	"relationships",	"keto",	"HolUp",	"socialskills",	"howto",	"Games",	"Sneakers",	"slowcooking",	"gameofthrones",	"CrappyDesign",	"foodhacks",	"DeepIntoYouTube",	"raspberry_pi",	"BetterEveryLoop",	"OutOfTheLoop",	"hardware",	"camping",	"Wellthatsucks",	"biology",	"NoStupidQuestions",	"nasa",	"humor",	"nfl",	"pcgaming",	"assholedesign",	"youtubehaiku",	"offmychest",	"unpopularopinion",	"teenagers",	"bodyweightfitness",	"frugalmalefashion",	"trashy",	"nutrition",	"marvelstudios",	"spaceporn",	"DnD",	"MurderedByWords",	"ChildrenFallingOver",	"atheism",	"mac",	"Filmmakers",	"coolguides",	"ArtefactPorn",	"HealthyFood",	"ksi",	"DestinyTheGame",	"MaliciousCompliance",	"rickandmorty",	"CozyPlaces",	"comicbooks",	"Economics",	"WhitePeopleTwitter",	"educationalgifs",	"femalefashionadvice",	"horror",	"MealPrepSunday",	"Astronomy",	"PS5",	"RoastMe",	"yesyesyesyesno",	"hacking",	"MachineLearning",	"DiWHY",	"Animemes",	"likeus",	"oddlyterrifying",	"bodybuilding",	"StarWars",	"formula1",	"writing",	"dogs",	"blursedimages",	"astrophotography",	"homestead",	"Frugal",	"DoesAnybodyElse",	"marvelmemes",	"TrollYChromosome",	"CampingandHiking",	"youseeingthisshit",	"electronicmusic",	"solotravel",	"ThriftStoreHauls",	"natureismetal",	"ChoosingBeggars",	"anime_irl",	"podcasts",	"pettyrevenge",	"Android",	"WinStupidPrizes",	"Coronavirus",	"dogecoin",	"StockMarket",	"ProgrammerHumor",	"suggestmeabook",	"instantkarma",	"Fantasy",	"indieheads",	"Perfectfit",	"wow",	"legaladvice",	"rareinsults",	"sex",	"ethtrader",	"crafts",	"PrequelMemes",	"Design",	"javascript",	"antiwork",	"Graffiti",	"reallifedoodles",	"technicallythetruth",	"apexlegends",	"nintendo",	"Roadcam",	"PoliticalDiscussion",	"progresspics",	"meme",	"nevertellmetheodds",	"whatisthisthing",	"maybemaybemaybe",	"baseball",	"FreeEBOOKS",	"FiftyFifty",	"compsci",	"insanepeoplefacebook",	"Survival",	"AbruptChaos",	"WhatsWrongWithYourDog",	"PeopleFuckingDying",	"shittyfoodporn",	"investing",	"hiphopheads",	"zelda",	"running",	"MMA",	"FortNiteBR",	"meirl",	"PUBATTLEGROUNDS",	"tipofmytongue",	"DunderMifflin",	"math",	"Physics",	"JapanTravel",	"CasualConversation",	"terriblefacebookmemes",	"MapPorn",	"mealtimevideos",	"entitledparents",	"ArtisanVideos",	"GamePhysics",	"teslamotors",	"JusticeServed",	"comics",	"homeautomation",	"urbanexploration",	"somethingimade",	"IWantOut",	"google",	"WeAreTheMusicMakers",	"iamatotalpieceofshit",	"Marvel",	"literature",	"hmmm",	"shitposting",	"pennystocks",	"trees",	"hearthstone",	"roadtrip",	"analog",	"AbandonedPorn",	"savedyouaclick",	"audiophile",	"JUSTNOMIL",	"CryptoMoonShots",	"hiking",	"toptalent",	"wallpaper",	"vandwellers",	"CollegeBasketball",	"changemyview",	"conspiracy",	"techsupport",	"AnimeART",	"AnimalCrossing",	"Justrolledintotheshop",	"ExposurePorn",	"Cinemagraphs",	"TooAfraidToAsk",	"SweatyPalms",	"Cringetopia",	"digitalnomad",	"EDM",	"kpop",	"ATBGE",	"GlobalOffensive",	"Poetry",	"softwaregore",	"quityourbullshit",	"FanTheories",	"holdmycosmo",	"CatastrophicFailure",	"perfectlycutscreams",	"madlads",	"comedyheaven",	"chemistry",	"Shoestring",	"TrueOffMyChest",	"ShittyLifeProTips",	"Watches",	"spacex",	"carporn",	"Metal",	"ThatsInsane",	"fightporn",	"TIHI",	"iamverysmart",	"breakingbad",	"SketchDaily",	"UnresolvedMysteries",	"Genshin_Impact",	"MemeEconomy",	"PerfectTiming",	"AsianBeauty",	"CFB",	"RoomPorn",	"3Dprinting",	"manga",	"MachinePorn",	"confusing_perspective",	"specializedtools",	"Screenwriting",	"Guitar",	"PoliticalHumor",	"animememes",	"thewalkingdead",	"Rainbow6",	"algotrading",	"BokuNoHeroAcademia",	"realestateinvesting",	"motorcycles",	"niceguys",	"Eldenring",	"cursedimages",	"LivestreamFail",	"powerwashingporn",	"ADHD",	"snowboarding",	"rpg",	"VALORANT",	"dating",	"Amd",	"MangaCollectors",	"cringepics",	"AskHistorians",	"SpecArt",	"thatHappened",	"AnimeSketch",	"hockey",	"netflix",	"KerbalSpaceProgram",	"childfree",	"photocritique",	"Entrepreneur",	"SkincareAddiction",	"forbiddensnacks",	"financialindependence",	"Steam",	"awfuleverything",	"Makeup",	"ofcoursethatsathing",	"StartledCats",	"ethereum",	"malelivingspace",	"FuckYouKaren",	"2meirl4meirl",	"insaneparents",	"UnethicalLifeProTips",	"harrypotter",	"skiing",	"ProRevenge",	"classicalmusic",	"modernwarfare",	"greentext",	"ShouldIbuythisgame",	"Health",	"canada",	"houseplants",	"MyPeopleNeedMe",	"southpark",	"skyrim",	"povertyfinance",	"Bossfight",	"Zoomies",	"Colorization",	"webdev",	"cringe",	"psychology",	"OnePiece",	"TikTokCringe",	"mashups",	"PremierLeague",	"halo",	"ArchitecturePorn",	"holdmybeer",	"DesignPorn",	"ShingekiNoKyojin",	"gtaonline",	"lotrmemes",	"XboxSeriesX",	"4chan",	"truegaming",	"privacy",	"sadcringe",	"AbsoluteUnits",	"Shitty_Car_Mods",	"AnimalTextGifs",	"iamverybadass",	"gifsthatkeepongiving",	"elonmusk",	"popheads",	"nvidia",	"Fishing",	"Twitch",	"CasualUK",	"BuyItForLife",	"theydidthemath",	"self",	"StardewValley",	"tumblr",	"WhyWereTheyFilming",	"IWantToLearn",	"suspiciouslyspecific",	"ANormalDayInRussia",	"CrazyFuckingVideos",	"FunnyAnimals",	"selfimprovement",	"CODWarzone",	"BeforeNAfterAdoption",	"TheLastAirbender",	"oddlyspecific",	"Boxing"];
+    function autocomplete(inp, arr) {
+  /*the autocomplete function takes two arguments,
+  the text field element and an array of possible autocompleted values:*/
+  var currentFocus;
+  /*execute a function when someone writes in the text field:*/
+  inp.addEventListener("input", function(e) {
+      var a, b, i, val = this.value;
+      /*close any already open lists of autocompleted values*/
+      closeAllLists();
+      if (!val) { return false;}
+      currentFocus = -1;
+      /*create a DIV element that will contain the items (values):*/
+      a = document.createElement("DIV");
+      a.setAttribute("id", this.id + "autocomplete-list");
+      a.setAttribute("class", "autocomplete-items");
+      /*append the DIV element as a child of the autocomplete container:*/
+      this.parentNode.appendChild(a);
+      /*for each item in the array...*/
+      for (i = 0; i < arr.length; i++) {
+        /*check if the item starts with the same letters as the text field value:*/
+        if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+          /*create a DIV element for each matching element:*/
+          b = document.createElement("DIV");
+          /*make the matching letters bold:*/
+          b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
+          b.innerHTML += arr[i].substr(val.length);
+          /*insert a input field that will hold the current array item's value:*/
+          b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+          /*execute a function when someone clicks on the item value (DIV element):*/
+              b.addEventListener("click", function(e) {
+              /*insert the value for the autocomplete text field:*/
+              inp.value = this.getElementsByTagName("input")[0].value;
+              /*close the list of autocompleted values,
+              (or any other open lists of autocompleted values:*/
+              closeAllLists();
+          });
+          a.appendChild(b);
+        }
+      }
+  });
+  /*execute a function presses a key on the keyboard:*/
+  inp.addEventListener("keydown", function(e) {
+      var x = document.getElementById(this.id + "autocomplete-list");
+      if (x) x = x.getElementsByTagName("div");
+      if (e.keyCode == 40) {
+        /*If the arrow DOWN key is pressed,
+        increase the currentFocus variable:*/
+        currentFocus++;
+        /*and and make the current item more visible:*/
+        addActive(x);
+      } else if (e.keyCode == 38) { //up
+        /*If the arrow UP key is pressed,
+        decrease the currentFocus variable:*/
+        currentFocus--;
+        /*and and make the current item more visible:*/
+        addActive(x);
+      } else if (e.keyCode == 13) {
+        /*If the ENTER key is pressed, prevent the form from being submitted,*/
+        e.preventDefault();
+        if (currentFocus > -1) {
+          /*and simulate a click on the "active" item:*/
+          if (x) x[currentFocus].click();
+        }
+      }
+  });
+  function addActive(x) {
+    /*a function to classify an item as "active":*/
+    if (!x) return false;
+    /*start by removing the "active" class on all items:*/
+    removeActive(x);
+    if (currentFocus >= x.length) currentFocus = 0;
+    if (currentFocus < 0) currentFocus = (x.length - 1);
+    /*add class "autocomplete-active":*/
+    x[currentFocus].classList.add("autocomplete-active");
+  }
+  function removeActive(x) {
+    /*a function to remove the "active" class from all autocomplete items:*/
+    for (var i = 0; i < x.length; i++) {
+      x[i].classList.remove("autocomplete-active");
+    }
+  }
+  function closeAllLists(elmnt) {
+    /*close all autocomplete lists in the document,
+    except the one passed as an argument:*/
+    var x = document.getElementsByClassName("autocomplete-items");
+    for (var i = 0; i < x.length; i++) {
+      if (elmnt != x[i] && elmnt != inp) {
+      x[i].parentNode.removeChild(x[i]);
+    }
+  }
+}
+
+
+
+
+
+
+/*execute a function when someone clicks in the document:*/
+document.addEventListener("click", function (e) {
+    closeAllLists(e.target);
+});
+}
+
+autocomplete(document.getElementById("myInput"), countries);
+
+var local_host = true
+
+var api_url = "https://nickwood5.pythonanywhere.com/get/"
+var app_url, json_response
+
+if (local_host) {
+    app_url = "ws://127.0.0.1:8003/"
+} else {
+    app_url = "wss://nickwood-reddit-sentiment.herokuapp.com/"
+}
+
+var request = new XMLHttpRequest();
+request.open('GET', api_url, false);  // `false` makes the request synchronous
+request.send(null);
+
+var id
+if (request.status === 200) {
+    json_response = JSON.parse(request.responseText)
+    //console.log(json_response.id)
+    id = json_response.id
+}
+console.log("ID is " + id)
+
+function get_subreddit_sentiment(subreddit, after, before) {
+    var progressBar = document.getElementById("file")
+    var socket = new WebSocket(app_url + id)
+    var response
+    socket.onopen = function(e) {
+        //console.log("Connect to server")
+        let connect_json = {"subreddit": subreddit, "after": after, "before": before}
+        let connect_packet = JSON.stringify(connect_json)
+        socket.send(connect_packet)
+
+        
+    }
+    socket.onmessage = function(message) {
+        response = JSON.parse(message.data)
+        console.log(response)
+        if (response["type"] == "progress") {
+            console.log(response["data"]["percentage"])
+            progressBar.value = response["data"]["percentage"]
+        }
+    }
+}
+
+var progressSection = document.getElementById("progress")
+var progressBar = document.getElementById("file")
+var button = document.getElementById("submit")
+var subreddit_name = document.getElementById("myInput")
+var current_unix_time, day_ago_unix_time
+button.addEventListener("click", function (e) { 
+    console.log("Testt")
+    current_unix_time = Math.round(Date.now() / 1000)
+    console.log("Current unix time is " + current_unix_time)
+    day_ago_unix_time = current_unix_time - 86400
+    console.log(day_ago_unix_time)
+    console.log(subreddit_name.value)
+    progressSection.style.display = "block"
+    get_subreddit_sentiment(subreddit_name.value, day_ago_unix_time, current_unix_time)
+});
+
+
+
+
+
+
+</script>
+
+<body>
+<!--Make sure the form has the autocomplete function switched off:-->
+<div actionstyle="margin:auto;width:50%;">
+    <div style="margin:auto;width:50%;">
+        <div class="autocomplete">
+        <input id="myInput" type="text" name="myCountry" placeholder="subreddit">
+        </div>
+        <button id="submit">Button</button>
+        <div id="progress" style="display:none;">
+            <progress id="file" value="0" max="100"> 32% </progress>
+            <p>dd</p>
+        </div>
+    </div>
+    
+</div>
+</body>
