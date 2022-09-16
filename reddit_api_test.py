@@ -222,3 +222,18 @@ for day in range (0, 30):
     get_post_list("bitcoin", start - (day * 86400), end - (day * 86400))
 
 """
+
+def is_subreddit_valid(subreddit):
+    post_json_link = "https://oauth.reddit.com/r/{}/about".format(subreddit)
+    response_code = 400
+    #while response_code != 200:
+    post_data = requests.get(post_json_link, headers=headers)
+    response_code = post_data.status_code
+    print(response_code)
+    #print(post_data.json())
+    #print(post_data)
+    if response_code == 200:
+        return True
+    else:
+        return False
+    

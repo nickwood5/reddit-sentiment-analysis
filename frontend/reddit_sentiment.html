@@ -15,6 +15,7 @@ input {
   font-size: 16px;
 }
 input[type=text] {
+  border-radius: 18px;
   background-color: #f1f1f1;
   width: 100%;
 }
@@ -48,6 +49,11 @@ input[type=submit] {
   background-color: DodgerBlue !important; 
   color: #ffffff; 
 }
+
+input:focus {
+    outline: none !important;
+    border:1px solid rgba(255, 0, 0, 0)(253, 253, 253);
+  }
 </style>
 
 <script defer type=module>
@@ -180,7 +186,9 @@ if (request.status === 200) {
 }
 console.log("ID is " + id)
 
+var progress_text = document.getElementById("progress_text")
 function get_subreddit_sentiment(subreddit, after, before) {
+    progress_text.innerHTML = "Estimated time remaining: ..."
     var progressBar = document.getElementById("file")
     var socket = new WebSocket(app_url + id)
     var response
@@ -197,15 +205,19 @@ function get_subreddit_sentiment(subreddit, after, before) {
         console.log(response)
         if (response["type"] == "progress") {
             console.log(response["data"]["percentage"])
+            console.log(String(response["data"]["percentage"]))
             progressBar.value = response["data"]["percentage"]
+            progress_text.innerHTML = "Estimated time remaining: " + String(response["data"]["estimated_time_remaining"]) + "s"
         }
     }
+    
 }
 
 var progressSection = document.getElementById("progress")
 var progressBar = document.getElementById("file")
 var button = document.getElementById("submit")
 var subreddit_name = document.getElementById("myInput")
+
 var current_unix_time, day_ago_unix_time
 button.addEventListener("click", function (e) { 
     console.log("Testt")
@@ -227,15 +239,19 @@ button.addEventListener("click", function (e) {
 
 <body>
 <!--Make sure the form has the autocomplete function switched off:-->
-<div actionstyle="margin:auto;width:50%;">
-    <div style="margin:auto;width:50%;">
+<br>
+<br>
+<br>
+<div actionstyle="margin:auto;width:50%;display:flex;">
+    <div style="margin:auto;width:300px;display:flex;">
         <div class="autocomplete">
         <input id="myInput" type="text" name="myCountry" placeholder="subreddit">
+        <label for="myInput">r/</label>
         </div>
         <button id="submit">Button</button>
         <div id="progress" style="display:none;">
-            <progress id="file" value="0" max="100"> 32% </progress>
-            <p>dd</p>
+            <progress id="file" value="0" max="100" style="width:300px;"> 32% </progress>
+            <p id="progress_text">dd</p>
         </div>
     </div>
     
